@@ -1,0 +1,57 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgres"
+  url      = env("DATABASE_URL")
+}
+
+enum CompModalities {
+  DANCE
+  RIME
+}
+
+model User {
+  id              String   @id @default(uuid())
+  name            String
+  email           String?
+  phone_number    String?
+  description     String?
+  social_networks Json?
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
+
+  comps     Comp[] @relation("UserAdminReference")
+  won_comps Comp[] @relation("UserWinnerReference")
+
+  @@unique([email, phone_number])
+  @@map("users")
+}
+
+model Comp {
+  id                      String         @id @default(uuid())
+  title                   String
+  description             String
+  day                     String
+  start_time              String
+  end_time                String?
+  date_time               DateTime
+  max_number_participants Int
+  location                String
+  online                  Boolean        @default(false)
+  rules                   String?
+  award                   String?
+  manual_start            Boolean        @default(true)
+  manual_shutdown         Boolean        @default(true)
+  modality                CompModalities
+  created_at              DateTime       @default(now())
+  updated_at              DateTime       @updatedAt
+
+  user_admin_id  String
+  user_winner_id String?
+  user_admin     User    @relation(fields: [user_admin_id], references: [id], name: "UserAdminReference")
+  user_winner    User?   @relation(fields: [user_winner_id], references: [id], name: "UserWinnerReference")
+
+  @@map("comps")
+}
