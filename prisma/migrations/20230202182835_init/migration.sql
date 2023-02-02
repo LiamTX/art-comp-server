@@ -40,6 +40,26 @@ CREATE TABLE "comps" (
     CONSTRAINT "comps_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "users_viewers_on_comps" (
+    "user_id" TEXT NOT NULL,
+    "comp_id" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "users_viewers_on_comps_pkey" PRIMARY KEY ("user_id","comp_id")
+);
+
+-- CreateTable
+CREATE TABLE "users_participants_on_comps" (
+    "user_id" TEXT NOT NULL,
+    "comp_id" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "users_participants_on_comps_pkey" PRIMARY KEY ("user_id","comp_id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "users_email_phone_number_key" ON "users"("email", "phone_number");
 
@@ -48,3 +68,15 @@ ALTER TABLE "comps" ADD CONSTRAINT "comps_user_admin_id_fkey" FOREIGN KEY ("user
 
 -- AddForeignKey
 ALTER TABLE "comps" ADD CONSTRAINT "comps_user_winner_id_fkey" FOREIGN KEY ("user_winner_id") REFERENCES "users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "users_viewers_on_comps" ADD CONSTRAINT "users_viewers_on_comps_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "users_viewers_on_comps" ADD CONSTRAINT "users_viewers_on_comps_comp_id_fkey" FOREIGN KEY ("comp_id") REFERENCES "comps"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "users_participants_on_comps" ADD CONSTRAINT "users_participants_on_comps_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "users_participants_on_comps" ADD CONSTRAINT "users_participants_on_comps_comp_id_fkey" FOREIGN KEY ("comp_id") REFERENCES "comps"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

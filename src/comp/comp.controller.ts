@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { Comp, Prisma } from '@prisma/client';
+import { Comp, Prisma, UserViewerOnComp } from '@prisma/client';
 import { CompService } from './comp.service';
 
 @Controller('comp')
@@ -17,8 +17,8 @@ export class CompController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.compService.findOne(+id);
+  async findOne(@Param('id') id: string): Promise<Comp> {
+    return await this.compService.findOne(id);
   }
 
   @Patch(':id')
@@ -29,5 +29,15 @@ export class CompController {
   @Delete(':id')
   async remove(@Param('id') id: string): Promise<Comp> {
     return await this.compService.remove(id);
+  }
+
+  @Post(':compId/viewer/:userId')
+  async referenceUserViewerOnComp(@Param('compId') compId: string, @Param('userId') userId: string): Promise<UserViewerOnComp> {
+    return await this.compService.referenceUserViewerOnComp(userId, compId);
+  }
+
+  @Post(':compId/participant/:userId')
+  async referenceUserParticipantOnComp(@Param('compId') compId: string, @Param('userId') userId: string): Promise<UserViewerOnComp> {
+    return await this.compService.referenceUserParticipantOnComp(userId, compId);
   }
 }

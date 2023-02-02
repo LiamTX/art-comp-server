@@ -1,5 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { Comp, Prisma } from '@prisma/client';
+import { Comp, Prisma, UserParticipantOnComp, UserViewerOnComp } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -14,7 +14,7 @@ export class CompService {
         ...data,
         date_time: new Date(data.date_time),
         user_admin: {
-          connect: { id: "e90a0a81-a66e-4c8c-ad32-8df19bdddeff" }
+          connect: { id: "720f9744-69f0-4b5f-9697-9f75d2e31094" }
         }
       }
     });
@@ -24,8 +24,8 @@ export class CompService {
     return await this.prismaService.comp.findMany();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} comp`;
+  async findOne(id: string): Promise<Comp> {
+    return await this.prismaService.comp.findFirst({ where: { id } });
   }
 
   async update(id: string, data: Prisma.CompUpdateInput): Promise<Comp> {
@@ -47,5 +47,105 @@ export class CompService {
     }
 
     return await this.prismaService.comp.delete({ where: { id } });
+  }
+
+  async referenceUserViewerOnComp(userId: string, compId: string): Promise<UserViewerOnComp> {
+    const user = await this.prismaService.user.findFirst({ where: { id: userId } });
+    if (!user) {
+      throw new HttpException('user_not_found', HttpStatus.NOT_FOUND);
+    }
+
+    const comp = await this.prismaService.comp.findFirst({ where: { id: compId } });
+    if (!comp) {
+      throw new HttpException('comp_not_found', HttpStatus.NOT_FOUND);
+    }
+
+    return await this.prismaService.userViewerOnComp.create({
+      data: {
+        comp_id: comp.id,
+        user_id: user.id
+      }
+    });
+  }
+
+  async referenceUserParticipantOnComp(userId: string, compId: string): Promise<UserParticipantOnComp> {
+    const user = await this.prismaService.user.findFirst({ where: { id: userId } });
+    if (!user) {
+      throw new HttpException('user_not_found', HttpStatus.NOT_FOUND);
+    }
+
+    const comp = await this.prismaService.comp.findFirst({ where: { id: compId } });
+    if (!comp) {
+      throw new HttpException('comp_not_found', HttpStatus.NOT_FOUND);
+    }
+
+    return await this.prismaService.userParticipantOnComp.create({
+      data: {
+        comp_id: comp.id,
+        user_id: user.id
+      }
+    });
+  }
+
+  async deleteReferenceUserViewerOnComp(userId: string, compId: string): Promise<UserViewerOnComp> {
+    const user = await this.prismaService.user.findFirst({ where: { id: userId } });
+    if (!user) {
+      throw new HttpException('user_not_found', HttpStatus.NOT_FOUND);
+    }
+
+    const comp = await this.prismaService.comp.findFirst({ where: { id: compId } });
+    if (!comp) {
+      throw new HttpException('comp_not_found', HttpStatus.NOT_FOUND);
+    }
+
+    const userViewerOnCompReference = await this.prismaService.userViewerOnComp.findFirst({
+      where: {
+        user_id: userId,
+        comp_id: compId
+      }
+    });
+    if (!userViewerOnCompReference) {
+      throw new HttpException('reference_not_found', HttpStatus.NOT_FOUND);
+    }
+
+    return await this.prismaService.userViewerOnComp.delete({
+      where: {
+        user_id_comp_id: {
+          user_id: userId,
+          comp_id: compId
+        }
+      }
+    });
+  }
+
+  async deleteReferenceUserParticipantOnComp(userId: string, compId: string): Promise<UserParticipantOnComp> {
+    const user = await this.prismaService.user.findFirst({ where: { id: userId } });
+    if (!user) {
+      throw new HttpException('user_not_found', HttpStatus.NOT_FOUND);
+    }
+
+    const comp = await this.prismaService.comp.findFirst({ where: { id: compId } });
+    if (!comp) {
+      throw new HttpException('comp_not_found', HttpStatus.NOT_FOUND);
+    }
+
+    const userViewerOnCompReference = await this.prismaService.userParticipantOnComp.findFirst({
+      where: {
+        user_id: userId,
+        comp_id: compId
+      }
+    });
+    if (!userViewerOnCompReference) {
+      throw new HttpException('reference_not_found', HttpStatus.NOT_FOUND);
+    }
+
+    return await this.prismaService.userParticipantOnComp.delete({
+      where: {
+        user_id_comp_id: {
+          user_id: userId,
+          comp_id: compId
+        }
+      }
+    });
   }
 }

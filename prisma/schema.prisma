@@ -22,8 +22,10 @@ model User {
   created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
 
-  comps     Comp[] @relation("UserAdminReference")
-  won_comps Comp[] @relation("UserWinnerReference")
+  admin_comps           Comp[]                  @relation("UserAdminReference")
+  won_comps             Comp[]                  @relation("UserWinnerReference")
+  UserViewerOnComp      UserViewerOnComp[]
+  UserParticipantOnComp UserParticipantOnComp[]
 
   @@unique([email, phone_number])
   @@map("users")
@@ -48,10 +50,38 @@ model Comp {
   created_at              DateTime       @default(now())
   updated_at              DateTime       @updatedAt
 
-  user_admin_id  String
-  user_winner_id String?
-  user_admin     User    @relation(fields: [user_admin_id], references: [id], name: "UserAdminReference")
-  user_winner    User?   @relation(fields: [user_winner_id], references: [id], name: "UserWinnerReference")
+  user_admin_id         String
+  user_winner_id        String?
+  user_admin            User                    @relation(fields: [user_admin_id], references: [id], name: "UserAdminReference")
+  user_winner           User?                   @relation(fields: [user_winner_id], references: [id], name: "UserWinnerReference")
+  UserViewerOnComp      UserViewerOnComp[]
+  UserParticipantOnComp UserParticipantOnComp[]
 
   @@map("comps")
+}
+
+model UserViewerOnComp {
+  user_id String
+  user    User   @relation(fields: [user_id], references: [id])
+  comp_id String
+  comp    Comp   @relation(fields: [comp_id], references: [id])
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@id([user_id, comp_id])
+  @@map("users_viewers_on_comps")
+}
+
+model UserParticipantOnComp {
+  user_id String
+  user    User   @relation(fields: [user_id], references: [id])
+  comp_id String
+  comp    Comp   @relation(fields: [comp_id], references: [id])
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@id([user_id, comp_id])
+  @@map("users_participants_on_comps")
 }
